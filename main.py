@@ -15,5 +15,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 OUT_DIR = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
+SRC = HERE / "entry.png"
+DST = OUT_DIR / "entry.png"
+
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(HERE / "entry.png", OUT_DIR / "entry.png")
+shutil.copyfile(SRC, DST)
+# The judge reads exactly these bytes: refuse to exit cleanly on a short copy.
+if DST.stat().st_size != SRC.stat().st_size:
+    raise SystemExit("entry.png copy incomplete")
