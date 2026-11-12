@@ -1,30 +1,30 @@
-"""cutest-picture-01 replacement entry (Python 3.13, standard library only).
+#!/usr/bin/env python3
+"""cutest-picture-01 round-3 entry: write the image to the output dir.
 
-The entry is the entry.png beside this file: a baby axolotl in a mint
-teacup hugging a yellow duckling. The program copies it to
-$MAKEFUN_OUTPUT_DIR/entry.png (default /output). Deterministic: the output
-bytes are always exactly the bytes of entry.png.
-
-Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
-  mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
+The image (a husky puppy hugging a penguin, supplied by the user) is stored
+as entry.png next to this program. This program copies it byte-for-byte to
+$MAKEFUN_OUTPUT_DIR/entry.png (default /output). Stdlib only, no network,
+deterministic: every run writes identical bytes.
 """
 
 import os
 import shutil
-from pathlib import Path
+import sys
 
-HERE = Path(__file__).resolve().parent
-OUT_DIR = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
 
-SRC = HERE / "entry.png"
-DST = OUT_DIR / "entry.png"
+def main() -> int:
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "entry.png")
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(out_dir, exist_ok=True)
+    dst = os.path.join(out_dir, "entry.png")
+    shutil.copyfile(src, dst)
+    # Post-copy check: the written file must be a complete copy.
+    if os.path.getsize(dst) != os.path.getsize(src):
+        print("error: incomplete copy of entry.png", file=sys.stderr)
+        return 1
+    return 0
 
-if not SRC.exists():
-    raise SystemExit("entry.png missing beside main.py")
 
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-shutil.copyfile(SRC, DST)
-# The judge reads exactly these bytes: refuse to exit cleanly on a short copy.
-copied = DST.stat().st_size
-if copied != SRC.stat().st_size:
-    raise SystemExit(f"entry.png copy incomplete: copied {copied} bytes")
+if __name__ == "__main__":
+    sys.exit(main())
